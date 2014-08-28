@@ -8,16 +8,6 @@ class Neuron
     private $weights = array();
 
     /**
-     * @var <float>
-     */
-    private $output = 0;
-
-    /**
-     * @var int
-     */
-    private $iterate = 0;
-
-    /**
      * @var float
      */
     private $bias;
@@ -46,17 +36,15 @@ class Neuron
 
 
     /**
-     * @param $k
-     * @param $value
+     * @param array $values
+     * @return float
      */
-    public function test($k, $value)
+    public function test(array $values)
     {
-        $this->output += $this->weights[$k]->get() * $value;
-        $this->iterate++;
-        if ($this->iterate === count($this->weights)) {
-            $this->output += $this->bias;
-            return $this->function->evaluate($this->output);
-        }
+        $output = $this->bias;
+        $output += array_sum(array_map(function ($a, $b) { return $a * $b; }, $values, $this->weights));
+
+        return $this->function->evaluate($output);
     }
 
 
@@ -66,20 +54,15 @@ class Neuron
      */
     public function train(array $inputs, $expected)
     {
-        foreach ($inputs as $k => $input) {
-            $output = $this->test($k, $input);
-        }
-        $this->reset();
+        $diff = $expected - $this->test($inputs);
 
-        $error = false;
+        $this->bias += $diff;
+        $errorRate = $this->learningRate * $diff;
         foreach ($this->weights as $k => $weight) {
-            $error = $error || ($expected != $output);
-            $weight->updateError($this->learningRate, $expected, $output, $inputs[$k]);
+            $weight->updateError($errorRate * $inputs[$k]);
         }
 
-        $this->bias = $this->bias + ($expected - $output);
-
-        return $error;
+        return $diff != 0;
     }
 
     /**
@@ -89,15 +72,9 @@ class Neuron
     {
         $return = array();
         foreach ($this->weights as $w) {
-            $return[] = $w->get();
+            $return[] = $w->value();
         }
         $return['bias'] = $this->bias;
         return $return;
-    }
-
-    public function reset()
-    {
-        $this->iterate = 0;
-        $this->output = 0;
     }
 }

@@ -18,7 +18,7 @@ class Weight
     /**
      * @return float
      */
-    public function get()
+    public function value()
     {
         return $this->weight;
     }
@@ -28,8 +28,8 @@ class Weight
      * @param $expected
      * @param $output
      */
-    public function updateError($learningRate, $expected, $output, $input)
+    public function updateError($weightError)
     {
-        $this->weight += $learningRate * ($expected - $output) * $input;
+        $this->weight += $weightError;
     }
 }

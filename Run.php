@@ -16,6 +16,7 @@ class Run
                 new Weight(),
                 new Weight(),
                 new Weight(),
+                new Weight(),
             )
         );
         var_dump("weights: " .var_export($neuron->getWeights(), true));
@@ -29,13 +30,14 @@ class Run
     {
         $error = true;
         $i = 0;
-        while ($error && $i < 10) {
+        while ($error && $i < 20) {
             $i++;
             $error = false;
-            $error |= $n->train(array(0,0,0), 0);
-            $error |= $n->train(array(0,1,1), 1);
-            $error |= $n->train(array(0,1,0), 1);
-            $error |= $n->train(array(1,0,1), 0);
+            $error |= $n->train(array(0,0,0,1), 0);
+            $error |= $n->train(array(0,0,1,1), 1);
+            $error |= $n->train(array(0,0,1,0), 0);
+            //$error |= $n->train(array(1,1,0,0), 0);
+            //$error |= $n->train(array(1,1,1,1), 1);
             echo "try $i: $error\n";
             //var_dump("weights: " .var_export($n->getWeights(), true));
         }
@@ -43,21 +45,20 @@ class Run
 
     public function test(Neuron $n)
     {
-        $this->testArray(array(1,0,0), $n, 0);
-        $this->testArray(array(0,1,0), $n, 1);
-        $this->testArray(array(0,0,0), $n, 0);
-        $this->testArray(array(1,1,0), $n, 1);
-        $this->testArray(array(1,1,1), $n, 1);
+        $this->testArray(array(0,1,0,0), $n);
+        $this->testArray(array(1,0,1,0), $n);
+        $this->testArray(array(1,0,0,0), $n);
+        $this->testArray(array(0,0,1,1), $n);
+        $this->testArray(array(0,1,1,0), $n);
+        $this->testArray(array(1,0,0,1), $n);
+        $this->testArray(array(1,1,1,1), $n);
 
     }
 
-    public function testArray($inputs, Neuron $n, $expected)
+    public function testArray($inputs, Neuron $n)
     {
-        foreach ($inputs as $k => $v) {
-            $result = $n->test($k, $v);
-        }
-        $n->reset();
-        echo var_export($inputs, true) .'='. $result ." : " .($result === $expected). "\n";
+        $result = $n->test($inputs);
+        echo var_export($inputs, true) .'='. $result ."\n";
     }
 }
 
